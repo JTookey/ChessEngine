@@ -147,7 +147,7 @@ fn show_board(board: Board) {
 
 fn find_best_move(board: &Board, depth: i8) -> Option<ChessMove> {
     let black_move = board.side_to_move() == Color::Black;
-    let moves = MoveGen::new_legal(board).nth(0);
+    let moves = MoveGen::new_legal(board);
 
     let mut best_value;
     let mut best_move = None;
