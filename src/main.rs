@@ -1,21 +1,16 @@
-extern crate args;
-extern crate getopts;
-
 use chess:: { Board, MoveGen, Color, BoardStatus, ChessMove, ALL_RANKS, Piece, get_rank };
 use std::env;
-use std::io::{self, BufRead};
+use std::io::{BufRead};
 use std::str::FromStr;
-use std::time::{Duration, Instant};
+use std::time::{Instant};
 use args::{Args, ArgsError};
 use getopts::Occur;
-use colored::{ ColoredString, Colorize };
 
 mod piece_values;
 mod benchmarks;
 
 const STARTING_FEN: &str = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
-const TEST_FEN: &str= "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1";
-const DEFAULT_DEPTH: i64 = 7;
+const DEFAULT_DEPTH: i64 = 4;
 
 const PROGRAM_DESC: &str = "A Chess Engine built in Rust";
 const PROGRAM_NAME: &str = "Scacchi";
@@ -107,7 +102,7 @@ fn alpha_beta(
                 let value = alpha_beta(&result_board, depth-1, true, alpha, beta, total);
                 best_value = std::cmp::min(value, best_value);
 
-                beta = std::cmp::min(alpha, best_value);
+                beta = std::cmp::min(beta, best_value);
                 if beta <= alpha {
                     break;
                 }
@@ -147,7 +142,7 @@ fn show_board(board: Board) {
         }
         print!("\n");
     }
-    println!(" a b c d e f g h");
+    println!("  a b c d e f g h");
 }
 
 fn find_best_move(board: &Board, depth: i8) -> Option<ChessMove> {
@@ -190,7 +185,7 @@ fn parse(
     args.flag("s", "selfplay", "Run in self play mode");
     args.flag("b", "bench", "Run benchmark");
     args.option("d", "depth", "Set the depth of tree search - default 4",
-        "DEPTH", Occur::Req, Some("4".to_string())
+        "DEPTH", Occur::Req, Some(DEFAULT_DEPTH.to_string())
     );
     args.option("f", "fen", "The state of the game as a FEN",
         "FEN", Occur::Optional, Some(STARTING_FEN.to_string())
@@ -219,7 +214,7 @@ fn exec_ai_turn(board: &mut Board, ply_count: i8) {
     show_board(*board);
 }
 
-fn exec_user_turn(board: &mut Board, ply_count: i8) {
+fn exec_user_turn(board: &mut Board) {
     let stdin = std::io::stdin();
     for line in stdin.lock().lines() {
         let s = match line {
@@ -246,7 +241,7 @@ fn interactive_loop(mut board: Board, ply_count: i8) {
             exec_ai_turn(&mut board, ply_count);
         } else {
             println!("Your turn...");
-            exec_user_turn(&mut board, ply_count);
+            exec_user_turn(&mut board);
         }
         ai_turn = !ai_turn;
     }
@@ -280,7 +275,7 @@ fn run_benchmark() {
 }
 
 fn main() {
-    println!("Hello Chess!");
+    println!("Scacchi !!");
 
     let args: Vec<String> = env::args().collect();
     let (is_interactive, is_selfplay, run_bench, fen_str, play_count) = parse(&args).unwrap();
@@ -292,7 +287,7 @@ fn main() {
 
     let board = match Board::from_str(fen_str.as_str()) {
         Ok(b) => b,
-        Err(e) => {
+        Err(_) => {
             println!("Bad FEN");
             return;
         }
