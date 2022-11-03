@@ -208,7 +208,7 @@ fn parse(
 fn exec_ai_turn(board: &mut Board, ply_count: i8) {
     match find_best_move(board, ply_count) {
         Some(n) => {*board = board.make_move_new(n)},
-        None => { println!("Error!! No move found")}
+        None => { println!("Error!! No move found") }
     }
     println!("--------------------");
     show_board(*board);
@@ -237,13 +237,25 @@ fn exec_user_turn(board: &mut Board) {
 fn interactive_loop(mut board: Board, ply_count: i8) {
     let mut ai_turn = true;
     loop {
-        if ai_turn {
-            exec_ai_turn(&mut board, ply_count);
-        } else {
-            println!("Your turn...");
-            exec_user_turn(&mut board);
+        match board.status() {
+            BoardStatus::Ongoing => {
+                if ai_turn {
+                    exec_ai_turn(&mut board, ply_count);
+                } else {
+                    println!("Your turn...");
+                    exec_user_turn(&mut board);
+                }
+                ai_turn = !ai_turn;
+            },
+            BoardStatus::Stalemate => {
+                println!("Stalemate...");
+                return;
+            },
+            BoardStatus::Checkmate => {
+                println!("Checkmate!!");
+                return;
+            }
         }
-        ai_turn = !ai_turn;
     }
 }
 
